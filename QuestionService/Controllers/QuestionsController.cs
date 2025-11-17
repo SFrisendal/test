@@ -95,7 +95,7 @@ public class QuestionsController(QuestionDbContext db) : ControllerBase
 
     [Authorize]
     [HttpDelete("{id}")]
-    public async Task<ActionResult> DeleteQuestion(string id, CreateQuestionDto dto)
+    public async Task<ActionResult> DeleteQuestion(string id)
     {
         var question = await db.Questions.FindAsync(id);
         if (question is null) return NotFound();
