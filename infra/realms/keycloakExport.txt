@@ -1,0 +1,11 @@
+use this script in powershell
+
+
+docker run --rm `
+  -v keycloak-data:/opt/keycloak/data `
+  -v "${PWD}/realms:/opt/keycloak/export" `
+  quay.io/keycloak/keycloak:26.4 `
+  export `
+  --realm overflow `
+  --dir /opt/keycloak/export `
+  --users realm_file
