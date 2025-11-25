@@ -1,4 +1,5 @@
 using System.Net.Sockets;
+using Common;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -24,53 +25,15 @@ builder.Services.AddMemoryCache();
 
 builder.Services.AddScoped<TagService>();
 
-builder.Services.AddAuthentication()
-    .AddKeycloakJwtBearer(serviceName: "keycloak", realm:"overflow", options =>
-    {
-        options.RequireHttpsMetadata = false;
-        options.Audience = "overflow";
-    });
+builder.Services.AddKeyCloakAuthentication();
 
 builder.AddNpgsqlDbContext<QuestionDbContext>("questionDb");
 
-builder.Services.AddOpenTelemetry().WithTracing(traceProviderBuilder =>
+await builder.UseWolverineWithRabbitMqAsync(opts =>
 {
-    traceProviderBuilder
-        .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(builder.Environment.ApplicationName))
-        .AddSource("Wolverine");
+    opts.PublishAllMessages().ToRabbitExchange("questions");
+    opts.ApplicationAssembly = typeof(Program).Assembly;
 });
-
-var retryPolicy = Policy
-    .Handle<BrokerUnreachableException>()
-    .Or<SocketException>()
-    .WaitAndRetryAsync(
-        retryCount: 5,
-        retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), 
-        (exception, timeSpan, retryCount) =>
-        {
-            Console.WriteLine($"Retry attempt {retryCount} failed. Retrying in "+$"{timeSpan.Seconds} seconds");
-        });
-
-
-await retryPolicy.ExecuteAsync(async () =>
-{
-    var endpoint = builder.Configuration.GetConnectionString("messaging")
-                   ?? throw new InvalidOperationException("messaging conn string not found");
-
-    var factory = new ConnectionFactory
-    {
-        Uri = new Uri(endpoint)
-    };
-
-    await using var connection = await factory.CreateConnectionAsync();
-});
-
-builder.Host.UseWolverine(opts =>
-    {
-        opts.UseRabbitMqUsingNamedConnection("messaging").AutoProvision();
-        opts.PublishAllMessages().ToRabbitExchange("questions");
-    }
-);
 
 var app = builder.Build();
 
