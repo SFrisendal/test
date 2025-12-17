@@ -59,7 +59,7 @@ var yarp = builder.AddYarp("gateway")
     {
         yarpBuilder.AddRoute("/questions/{**catch-all}", questionService);
         yarpBuilder.AddRoute("/tags/{**catch-all}", questionService);
-        yarpBuilder.AddRoute("/service/{**catch-all}", searchService);
+        yarpBuilder.AddRoute("/search/{**catch-all}", searchService);
     })
     .WithEnvironment("ASPNETCORE_URLS","http://*:8001")
     .WithEndpoint(port:8001, targetPort:8001, scheme:"http",name:"gateway",isExternal:true)

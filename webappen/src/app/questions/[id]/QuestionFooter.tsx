@@ -3,6 +3,7 @@
 import {Question} from "@/lib/types";
 import {Avatar, Chip} from "@heroui/react";
 import Link from "next/link";
+import {fuzzyTimeAgo} from "@/lib/util";
 
 type Props = {
     question: Question
@@ -26,7 +27,7 @@ export default function QuestionFooter({question}: Props) {
                 </div>
             </div>
             <div className='flex flex-col basis-2/5 bg-primary/10 px-3 py-2 gap-2 rounded-lg'>
-                <span className='text-sm font-extralight'>Asked {question.createdAt}</span>
+                <span className='text-sm font-extralight'>Asked {fuzzyTimeAgo(question.createdAt)}</span>
                 <div className='flex items-center gap-3'>
                     <Avatar className='h-6 w-6' color='secondary' 
                         name={question.askerDisplayName.charAt(0).toUpperCase()}/>

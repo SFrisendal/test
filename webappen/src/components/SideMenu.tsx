@@ -1,8 +1,7 @@
 ﻿'use client'
 
 import {Listbox, ListboxItem} from "@heroui/listbox";
-import {HomeIcon, TagIcon, UserIcon} from "@heroicons/react/24/solid"; 
-import {QuestionMarkCircleIcon} from "@heroicons/react/24/outline";
+import {HomeIcon, TagIcon, UserIcon,QuestionMarkCircleIcon} from "@heroicons/react/24/solid"; 
 import {usePathname} from "next/navigation";
 
     export default function SideMenu() {
