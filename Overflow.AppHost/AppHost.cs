@@ -59,6 +59,7 @@ var yarp = builder.AddYarp("gateway")
     {
         yarpBuilder.AddRoute("/questions/{**catch-all}", questionService);
         yarpBuilder.AddRoute("/tags/{**catch-all}", questionService);
+        yarpBuilder.AddRoute("/test/{**catch-all}", questionService);
         yarpBuilder.AddRoute("/search/{**catch-all}", searchService);
     })
     .WithEnvironment("ASPNETCORE_URLS","http://*:8001")
