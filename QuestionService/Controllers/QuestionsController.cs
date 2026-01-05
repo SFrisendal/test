@@ -1,9 +1,9 @@
 ﻿using System.Security.Claims;
 using Contracts;
 using FastExpressionCompiler;
+using Ganss.Xss;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using QuestionService.Data;
 using QuestionService.Models;
@@ -31,10 +31,12 @@ public class QuestionsController(QuestionDbContext db, IMessageBus bus, TagServi
 
         if (userid is null || userName is null) return BadRequest("Cannot get user details");
 
+        var sanitizer = new HtmlSanitizer();
+
         var question = new Question
         {
             Title = dto.Title,
-            Content = dto.Content,
+            Content = sanitizer.Sanitize(dto.Content),
             TagSlugs = dto.Tags,
             AskerId = userid,
             AskerDisplayName = userName
@@ -95,9 +97,11 @@ public class QuestionsController(QuestionDbContext db, IMessageBus bus, TagServi
 
         if (!await tagService.TagExistsAsync(dto.Tags))
             return BadRequest("Tag doesn't exist");
+        
+        var sanitizer = new HtmlSanitizer();
 
         question.Title = dto.Title;
-        question.Content = dto.Content;
+        question.Content = sanitizer.Sanitize(dto.Content);
         question.TagSlugs = dto.Tags;
         question.UpdatedAt = DateTime.UtcNow;
 
@@ -140,11 +144,13 @@ public class QuestionsController(QuestionDbContext db, IMessageBus bus, TagServi
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var name = User.FindFirstValue("name");
+        
+        var sanitizer = new HtmlSanitizer();
 
         if (userId is null || name is null) return BadRequest("Cannot get user details");
         var answer = new Answer
         {
-            Content = dto.Content,
+            Content = sanitizer.Sanitize(dto.Content),
             UserId = userId,
             UserDisplayName = name,
             QuestionId = questionId
@@ -168,8 +174,10 @@ public class QuestionsController(QuestionDbContext db, IMessageBus bus, TagServi
         var answer = await db.Answers.FindAsync(answerId);
         if (answer is null) return NotFound();
         if (answer.QuestionId != questionId) return BadRequest("Cannot update answer details");
+        
+        var sanitizer = new HtmlSanitizer();
 
-        answer.Content = dto.Content;
+        answer.Content = sanitizer.Sanitize(dto.Content);
         answer.UpdatedAt = DateTime.UtcNow;
 
         await db.SaveChangesAsync();
