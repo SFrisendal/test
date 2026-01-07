@@ -1,8 +1,7 @@
 ﻿'use client'
 
 import {Answer} from "@/lib/types";
-import {Avatar, Chip} from "@heroui/react";
-import Link from "next/link";
+import {Avatar} from "@heroui/react";
 import {fuzzyTimeAgo, handleError} from "@/lib/util";
 import {Button} from "@heroui/button";
 import {User} from "next-auth";

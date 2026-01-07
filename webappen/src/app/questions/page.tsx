@@ -3,7 +3,6 @@
 import {getQuestions} from "@/lib/actions/question-actions";
 import QuestionCard from "@/app/questions/QuestionCard";
 import QuestionsHeader from "@/app/questions/QuestionsHeader";
-import {SearchParams} from "next/dist/server/request/search-params";
 
 export default async function QuestionsPage({searchParams}: {searchParams?: Promise<{tag?: string}>}) {
     const params = await searchParams;

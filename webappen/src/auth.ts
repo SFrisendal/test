@@ -1,5 +1,6 @@
 ﻿import NextAuth from "next-auth"
 import Keycloak from "next-auth/providers/keycloak"
+import {authConfig} from "@/lib/config";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
     providers: [Keycloak({
@@ -28,13 +29,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             } 
             
             try {
-                const response = await fetch(`${process.env.AUTH_KEYCLOAK_ISSUER}/protocol/openid-connect/token`, {
+                const response = await fetch(`${authConfig.kcIssuer}/protocol/openid-connect/token`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                     body: new URLSearchParams({
                         grant_type: 'refresh_token',
-                        client_id: process.env.AUTH_KEYCLOAK_ID!,    
-                        client_secret: process.env.AUTH_KEYCLOAK_SECRET!,    
+                        client_id: authConfig.kcClientId,    
+                        client_secret: authConfig.kcSecret,    
                         refresh_token: token.refreshToken! as string
                     })
                 })

@@ -67,9 +67,21 @@ var yarp = builder.AddYarp("gateway")
     .WithEnvironment("VIRTUAL_HOST", "api.overflow.local")
     .WithEnvironment("VIRTUAL_PORT", "8001");
 
-var webapp = builder.AddNpmApp("webapp", "../webappen", "dev")
+var webapp = builder.AddJavaScriptApp("webapp", "../webappen")
+    .WithHttpEndpoint(env: "PORT", port: 3000, targetPort: 4000)
     .WithReference(keycloak)
-    .WithHttpEndpoint(env:"PORT", port: 3000);
+    .WithExternalHttpEndpoints()
+    .WithEnvironment("VIRTUAL_HOST", "app.overflow.local")
+    .WithEnvironment("VIRTUAL_PORT", "4000")
+    .PublishAsDockerFile();
+    
+    
+    // builder.AddNpmApp("webapp", "../webappen", "dev")
+    // .WithReference(keycloak)
+    // .WithHttpEndpoint(env:"PORT", port: 3000, targetPort: 4000)
+    // .WithEnvironment("VIRTUAL_HOST", "app.overflow.local")
+    // .WithEnvironment("VIRTUAL_PORT", "4000")
+    // .PublishAsDockerFile();
 
 if (!builder.Environment.IsDevelopment())
 {
