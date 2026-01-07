@@ -1,14 +1,61 @@
-﻿import {Answer} from "@/lib/types";
+﻿'use client'
+
+import {Answer} from "@/lib/types";
 import {Avatar, Chip} from "@heroui/react";
 import Link from "next/link";
-import {fuzzyTimeAgo} from "@/lib/util";
+import {fuzzyTimeAgo, handleError} from "@/lib/util";
+import {Button} from "@heroui/button";
+import {User} from "next-auth";
+import { useAnswerStore } from "@/lib/useAnswerStore";
+import {useState, useTransition} from "react";
+import {deleteAnswer} from "@/lib/actions/question-actions";
 
 type Props = {
     answer : Answer;
+    currentUser?: User | null;
 }
-export default function AnswerFooter({answer}: Props) {
+export default function AnswerFooter({answer , currentUser}: Props) {
+    const [pending, startTransition] = useTransition();
+    const [deleteTarget, setDeleteTarget] = useState<string>('');
+    const setAnswer = useAnswerStore(state => state.setAnswer);
+
+    const handleDelete = () => {
+        setDeleteTarget(answer.id);
+        startTransition(async () => {
+            const {error} = await deleteAnswer(answer.id, answer.questionId);
+            if (error) handleError(error);
+            setDeleteTarget('');
+        })
+    }
+
+
     return (
         <div className="flex justify-end mt-4">
+                <div className='flex items-center mt-auto gap-1'>
+                    {currentUser?.id === answer.userId &&
+                        <>
+                            <Button
+                                onPress={() => {
+                                    setAnswer(answer);
+                                    setTimeout(() => {
+                                        document.getElementById('answer-form')?.scrollIntoView({
+                                            behavior: 'smooth' });
+                                    }, 100);
+                                }}
+                                size='sm'
+                                variant='light'
+                                color='primary'
+                            >Edit</Button>
+                            <Button
+                                isLoading={pending && answer.id === deleteTarget}
+                                onPress={handleDelete}
+                                size='sm'
+                                variant='light'
+                                color='danger'
+                            >Delete</Button>
+                        </>}
+
+                </div>
             <div className='flex flex-col basis-2/5 bg-primary/10 px-3 py-2 gap-2 rounded-lg'>
                     <span className='text-sm font-extralight'>Answered {fuzzyTimeAgo(answer.createdAt)}</span>
                     <div className='flex items-center gap-3'>

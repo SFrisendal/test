@@ -4,35 +4,51 @@ import {zodResolver} from "@hookform/resolvers/zod";
 import {answerSchema, AnswerSchema} from "@/lib/schemas/answerSchema";
 import {Controller, useForm} from "react-hook-form";
 import {useTransition} from "react";
-import {postAnswer} from "@/lib/actions/question-actions";
+import {editAnswer, postAnswer} from "@/lib/actions/question-actions";
 import {Answer} from "@/lib/types";
 import {handleError} from "@/lib/util";
 import {Form} from "@heroui/form";
 import RichTextEditor from "@/components/rte/RichTextEditor";
 import { Button } from "@heroui/react";
+import {useAnswerStore} from "@/lib/useAnswerStore";
 
 type Props = {
-    answer?: Answer;
     questionId: string;
 }
 
-export default function AnswerForm({answer, questionId}: Props) {
-    const [pending, startTrasition] = useTransition();
-    const {control, handleSubmit, reset,formState} = useForm<AnswerSchema>({
+export default function AnswerForm({questionId}: Props) {
+    const [pending, startTransition] = useTransition();
+    const editableAnswer = useAnswerStore(state => state.answer);
+    const clearAnswer = useAnswerStore(state => state.clearAnswer)
+
+    const {control, handleSubmit, reset, formState} = useForm<AnswerSchema>({
         mode: 'onTouched',
-        resolver: zodResolver(answerSchema)
-    })
-    
+        resolver: zodResolver(answerSchema),
+        values: {
+            content: editableAnswer?.content
+        }
+    });
+
+
     const onSubmit = (data: AnswerSchema) => {
-        startTrasition(async () => {
-            const {error} = await postAnswer(data, questionId);
-            if (error) handleError(error);
-            reset();
+        startTransition(async () => {
+            if (editableAnswer) {
+                const {error} = await editAnswer(editableAnswer.id,
+                    editableAnswer.questionId, data);
+                if (error) handleError(error);
+                clearAnswer();
+                reset();
+            } else {
+                const {error} = await postAnswer(data, questionId);
+                if (error) handleError(error);
+                reset();
+            }
         })
     }
-    
+
+
     return (
-        <div className='flex flex-col gap-3 items-start my-4 w-full px-6'>
+        <div id='answer-form' className='flex flex-col gap-3 items-start my-4 w-full px-6'>
             <h3 className='text-2xl font-semibold'>
                 Your Answer
             </h3>
@@ -56,15 +72,30 @@ export default function AnswerForm({answer, questionId}: Props) {
                         </>
                     )}
                 />
-                <Button
-                    className='w-fit'
-                    isDisabled={!formState.isValid || pending}
-                    isLoading={pending}
-                    color='primary'
-                    type='submit'
-                >
-                    Post Your Answer
-                </Button>
+                
+                <div className='flex items-start gap-3 mb-6'>
+                    <Button
+                        isDisabled={!formState.isValid || pending}
+                        isLoading={pending}
+                        color='primary'
+                        className='w-fit'
+                        type='submit'
+                    >
+                        {editableAnswer ? 'Update' : 'Post'} your answer
+                    </Button>
+                    <Button
+                        isDisabled={!editableAnswer}
+                        onPress={() => {
+                            clearAnswer();
+                            reset();
+                        }}
+                        className='w-fit'
+                        type='button'
+                    >
+                        Cancel
+                    </Button>
+                </div>
+
             </form>
         </div>
     );
