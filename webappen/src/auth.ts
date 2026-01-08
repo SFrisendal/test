@@ -5,8 +5,11 @@ import {authConfig} from "@/lib/config";
 export const { handlers, auth, signIn, signOut } = NextAuth({
     providers: [Keycloak({
         authorization:{
-            params:{scope: 'openid profile email'}
-        }
+            params:{scope: 'openid profile email'},
+            url: `${authConfig.kcIssuer}/protocol/openid-connect/auth`
+        },
+        token: `${authConfig.kcInternal}/protocol/openid-connect/token`,
+        userinfo: `${authConfig.kcInternal}/protocol/openid-connect/userinfo`,
     })],
     callbacks:{
         async jwt({token, account, profile}){
@@ -29,7 +32,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             } 
             
             try {
-                const response = await fetch(`${authConfig.kcIssuer}/protocol/openid-connect/token`, {
+                const response = await fetch(`${authConfig.kcInternal}/protocol/openid-connect/token`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                     body: new URLSearchParams({

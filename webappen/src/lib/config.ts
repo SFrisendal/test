@@ -13,6 +13,7 @@ export const authConfig = {
     kcIssuer : getEnv('AUTH_KEYCLOAK_ISSUER'),
     kcSecret : getEnv('AUTH_KEYCLOAK_SECRET'),
     kcClientId : getEnv('AUTH_KEYCLOAK_ID'),
+    kcInternal : getEnv('AUTH_KEYCLOAK_ISSUER_INTERNAL'),
     secret : getEnv('AUTH_SECRET'),
     authUrl : getEnv('AUTH_URL'),
 }
@@ -24,5 +25,5 @@ export const apiConfig = {
 export const cloudinaryConfig = {
     cloudName : getEnv('NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME'),
     apiKey : getEnv('NEXT_PUBLIC_CLOUDINARY_API_KEY'),
-    apiSecret : getEnv('X7epo5ICjn_N9rsP_B1FVJtHkRw'),
+    apiSecret : getEnv('CLOUDINARY_API_SECRET'),
 }
